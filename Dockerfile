@@ -2,6 +2,52 @@ ARG DEBIAN_IMG_TAG=slim-bookworm
 ARG PYTHON_IMG_TAG=3.10
 
 FROM docker.io/python:${PYTHON_IMG_TAG}-${DEBIAN_IMG_TAG} as base
+
+# Copy environment variables from Digital Ocean
+ARG ENABLE_PROXYFIX
+ARG OSM_SERVER_URL
+ARG OSM_NOMINATIM_SERVER_URL
+ARG OSM_REGISTER_URL
+ARG PD_CLIENT_ID
+ARG PD_CLIENT_SECRET
+ARG PD_SERVER_URL
+ARG POSTGRES_DB
+ARG POSTGRES_USER
+ARG POSTGRES_PASSWORD
+ARG POSTGRES_ENDPOINT
+ARG POSTGRES_PORT
+ARG TM_APP_API_URL
+ARG TM_APP_API_VERSION
+ARG TM_APP_BASE_URL
+ARG TM_CLIENT_ID
+ARG TM_CLIENT_SECRET
+ARG TM_EMAIL_CONTACT_ADDRESS
+ARG TM_EMAIL_FROM_ADDRESS
+ARG TM_ENV
+ARG TM_LOG_LEVEL
+ARG TM_ORG_NAME
+ARG TM_ORG_CODE
+ARG TM_ORG_LOGO
+ARG TM_ORG_URL
+ARG TM_ORG_PRIVACY_POLICY_URL
+ARG TM_ORG_TWITTER
+ARG TM_ORG_FB
+ARG TM_ORG_INSTAGRAM
+ARG TM_ORG_YOUTUBE
+ARG TM_ORG_GITHUB
+ARG TM_REDIRECT_URI
+ARG TM_SCOPE
+ARG TM_SECRET
+ARG TM_SMTP_HOST
+ARG TM_SMTP_PASSWORD
+ARG TM_SMTP_USER
+ARG TM_USER_STATS_API_URL
+ARG TM_HOMEPAGE_STATS_API_URL
+ARG TM_DEFAULT_CHANGESET_COMMENT
+ARG TM_DEFAULT_LOCALE
+ARG TM_IMPORT_MAX_FILESIZE
+ARG TZ
+
 ARG APP_VERSION=0.1.0
 ARG DOCKERFILE_VERSION=0.5.0
 ARG ALPINE_IMG_TAG
@@ -12,7 +58,7 @@ LABEL org.hotosm.tasks.app-version="${APP_VERSION}" \
       org.hotosm.tasks.python-img-tag="${PYTHON_IMG_TAG}" \
       org.hotosm.tasks.dockerfile-version="${DOCKERFILE_VERSION}" \
       org.hotosm.tasks.maintainer="${MAINTAINER}" \
-      org.hotosm.tasks.api-port="5000"
+      org.hotosm.tasks.api-port="8000"
 # Fix timezone (do not change - see issue #3638)
 ENV TZ UTC
 # Add non-root user, permissions, init log dir
@@ -26,7 +72,8 @@ RUN pip install --no-cache-dir --upgrade pip
 WORKDIR /opt/python
 COPY pyproject.toml pdm.lock README.md /opt/python/
 RUN pip install --no-cache-dir pdm==2.7.4
-RUN pdm export --prod --without-hashes > requirements.txt
+# don't use the --prod argument since we need dev dependencies to run migrations later
+RUN pdm export --without-hashes > requirements.txt
 
 
 
@@ -48,6 +95,10 @@ USER appuser:appuser
 RUN pip install --user --no-warn-script-location \
     --no-cache-dir -r /opt/python/requirements.txt
 
+
+# run migrations every time
+FROM base as migrations
+CMD ["python", "manage.py", "db", "upgrade"]
 
 
 FROM base as runtime
@@ -96,7 +147,7 @@ RUN apt-get update && \
 # Pre-compile packages to .pyc (init speed gains)
 RUN python -c "import compileall; compileall.compile_path(maxlevels=10, quiet=1)"
 RUN python -m compileall .
-EXPOSE 5000/tcp
+EXPOSE 8000/tcp
 USER appuser:appuser
 CMD ["gunicorn", "-c", "python:backend.gunicorn", "manage:application", \
     "--workers", "1", "--log-level", "error"]
