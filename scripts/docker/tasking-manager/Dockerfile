@@ -39,5 +39,5 @@ RUN cd frontend && npm install && npm run build
 
 # INITIALIZATION
 
-EXPOSE 5000
+EXPOSE 8000
 CMD ["pdm", "run", "flask", "run", "-h", "0.0.0.0"]

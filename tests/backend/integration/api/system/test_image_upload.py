@@ -8,7 +8,7 @@ from tests.backend.helpers.test_helpers import (
 )
 
 
-IMAGE_UPLOAD_API_URL = "http://localhost:5000"
+IMAGE_UPLOAD_API_URL = "http://localhost:8000"
 IMAGE_UPLOAD_API_KEY = "test"
 
 
