@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import messages from './messages';
 import { useExploreProjectsQueryParams, stringify } from '../../hooks/UseProjectsQueryAPI';
 import { DifficultyMessage } from '../mappingLevel';
+import { MapDatabaseMessage } from '../mapDatabase';
 import { Dropdown } from '../dropdown';
 import { ProjectSearchBox } from './projectSearchBox';
 import ClearFilters from './clearFilters';
@@ -78,6 +79,32 @@ const DifficultyDropdown = (props) => {
   );
 };
 
+const DatabaseDropdown = (props) => {
+  return (
+    <Dropdown
+      onChange={(n) => {
+        const value = n && n[0] && n[0].value;
+        props.setQuery(
+          {
+            ...props.fullProjectsQuery,
+            page: undefined,
+            database: value,
+          },
+          'pushIn',
+        );
+      }}
+      value={props.fullProjectsQuery.database || []}
+      options={[
+        { label: <MapDatabaseMessage db="ALL" className="" />, value: 'ALL' },
+        { label: <MapDatabaseMessage db="OSM" className="" />, value: 'OSM' },
+        { label: <MapDatabaseMessage db="PDMAP" className="" />, value: 'PDMAP' },
+      ]}
+      display={<FormattedMessage {...messages.database} />}
+      className={'ba b--tan bg-white mr3 f6 v-mid dn dib-ns pv2 br1 pl3 fw5 blue-dark'}
+    />
+  );
+};
+
 export const ProjectNav = (props) => {
   const location = useLocation();
   const [fullProjectsQuery, setQuery] = useExploreProjectsQueryParams();
@@ -90,12 +117,12 @@ export const ProjectNav = (props) => {
     setQuery(
       {
         ...fullProjectsQuery,
-        omitMapResults:!isMapShown
+        omitMapResults: !isMapShown,
       },
       'pushIn',
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[isMapShown])
+  }, [isMapShown]);
   const linkCombo = 'link ph3 f6 pv2 ba b--tan br1 ph3 fw5';
 
   const moreFiltersAnyActive =
@@ -115,16 +142,20 @@ export const ProjectNav = (props) => {
   // onSelectedItemChange={(changes) => console.log(changes)}
   return (
     /* mb1 mb2-ns (removed for map, but now small gap for more-filters) */
-    <header className="bt bb b--tan w-100 ">
+    <header id="explore-nav" className="bt bb b--tan w-100 ">
       <div className="mt2 mb1 ph3 dib lh-copy w-100 cf">
         <div className="w-80-l w-90-m w-100 fl dib">
           <div className="dib">
+          <div className="mv2 dib">
+              <DatabaseDropdown setQuery={setQuery} fullProjectsQuery={fullProjectsQuery} />
+            </div>
             <div className="mv2 dib">
               <DifficultyDropdown setQuery={setQuery} fullProjectsQuery={fullProjectsQuery} />
             </div>
             <ProjectsActionFilter setQuery={setQuery} fullProjectsQuery={fullProjectsQuery} />
             <Link
               to={filterRouteToggled}
+              id="more-filter-id"
               className={`dn mr3 dib-l lh-title f6 ${linkCombo} ${moreFiltersCurrentActiveStyle} blue-dark`}
             >
               <FormattedMessage {...messages.moreFilters} />

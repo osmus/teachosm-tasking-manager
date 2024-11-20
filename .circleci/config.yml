@@ -10,7 +10,7 @@ jobs:
   frontend-code-test:
     resource_class: large
     docker:
-      - image: cimg/node:16.20
+      - image: cimg/node:18.19.1
     working_directory: /home/circleci/tasking-manager
     steps:
       - checkout
@@ -32,7 +32,7 @@ jobs:
           name: Run yarn test
           command: |
             cd ${CIRCLE_WORKING_DIRECTORY}/frontend/
-            CI=true yarn test -w 1
+            CI=true yarn test -w 3 --silent
             CI=true GENERATE_SOURCEMAP=false yarn build
 
   backend-code-check-PEP8:
@@ -42,7 +42,7 @@ jobs:
       - checkout
       - run:
           name: flake8 tests
-          command: | 
+          command: |
             pip install flake8
             flake8 manage.py backend tests migrations
 
@@ -53,7 +53,7 @@ jobs:
       - checkout
       - run:
           name: black tests
-          command: | 
+          command: |
             pip install 'black==23.12.1' ## TODO: Update to version 24
             black --check manage.py backend tests migrations
 
@@ -184,7 +184,7 @@ jobs:
     working_directory: /home/circleci/tasking-manager
     resource_class: medium
     docker:
-      - image: cimg/python:3.10.7-node
+      - image: cimg/node:18.19.1
     steps:
       - checkout
       - aws-cli/setup:
@@ -237,7 +237,7 @@ jobs:
     working_directory: /home/circleci/tasking-manager
     resource_class: large
     docker:
-      - image: cimg/python:3.10.7-node
+      - image: cimg/node:18.19.1
     parameters:
       stack_name:
         description: "the name of the stack for cfn-config"
@@ -509,5 +509,3 @@ workflows:
       - backend-code-check-PEP8
       - backend-code-check-Black
       - backend-functional-tests
-
-

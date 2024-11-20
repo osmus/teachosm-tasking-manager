@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { FormattedMessage, useIntl } from 'react-intl';
 
 import messages from '../user/messages';
-import { TwitterIconNoBg, FacebookIcon, LinkedinIcon, ProfilePictureIcon } from '../svgIcons';
+import { TwitterIcon, FacebookIcon, LinkedinIcon, ProfilePictureIcon } from '../svgIcons';
 import { MappingLevelMessage } from '../mappingLevel';
 import { NextMappingLevel } from '../user/topBar';
 import { UserOrganisations } from './userTeamsOrgs';
@@ -26,7 +26,7 @@ export const SocialMedia = ({ data }) => {
 
     switch (field) {
       case 'twitterId':
-        return <TwitterIconNoBg style={iconStyle} className="light-blue v-mid" />;
+        return <TwitterIcon style={iconStyle} className="light-blue v-mid" />;
       case 'facebookId':
         return <FacebookIcon style={iconStyle} className="dark-blue v-mid" />;
       case 'linkedinId':
@@ -61,7 +61,7 @@ export const SocialMedia = ({ data }) => {
 
   return (
     <ul className="list pa0 ma0 mt3">
-      <li className="dib mr4-ns mr2 cf f7">
+      <li className="dib mr4-ns mr2 cf f6">
         <div className="mr2 h2">
           <img className="h1 v-mid" src={OsmLogo} alt="OpenStreetMap" />{' '}
           {createLink('osm', data.username)}
@@ -81,7 +81,7 @@ export const SocialMedia = ({ data }) => {
       </li>
       {data.slackId && (
         <li
-          className="dib mr4-ns mr2 cf f7"
+          className="dib mr4-ns mr2 cf f6"
           title={intl.formatMessage(messages.slackUsername, { org: ORG_CODE })}
         >
           <div className="mr2 h2 blue-grey">

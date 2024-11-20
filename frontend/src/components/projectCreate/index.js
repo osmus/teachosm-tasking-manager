@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useCallback, Suspense, useEffect } from 'react';
+import { lazy, useState, useLayoutEffect, useCallback, Suspense, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useQueryParam, NumberParam } from 'use-query-params';
@@ -34,7 +34,7 @@ import {
 } from '../../utils/geoFileFunctions';
 import { getErrorMsg } from './fileUploadErrors';
 
-const ProjectCreationMap = React.lazy(() =>
+const ProjectCreationMap = lazy(() =>
   import('./projectCreationMap' /* webpackChunkName: "projectCreationMap" */),
 );
 
@@ -134,6 +134,7 @@ const ProjectCreate = () => {
   const [step, setStep] = useState(1);
   const [cloneProjectName, setCloneProjectName] = useState(null);
   const [cloneProjectOrg, setCloneProjectOrg] = useState(null);
+  const [cloneProjectDatabase, setCloneProjectDatabase] = useState('OSM');
   const [err, setErr] = useState({ error: false, message: null });
 
   const fetchCloneProjectInfo = useCallback(
@@ -141,8 +142,9 @@ const ProjectCreate = () => {
       const res = await fetchLocalJSONAPI(`projects/${cloneFromId}/`, token);
       setCloneProjectName(res.projectInfo.name);
       setCloneProjectOrg(res.organisation);
+      setCloneProjectDatabase(res.database);
     },
-    [setCloneProjectName, setCloneProjectOrg, token],
+    [setCloneProjectName, setCloneProjectOrg, setCloneProjectDatabase, token],
   );
 
   useLayoutEffect(() => {
@@ -155,6 +157,7 @@ const ProjectCreate = () => {
     id: cloneFromId,
     name: cloneProjectName,
     organisation: cloneProjectOrg,
+    database: cloneProjectDatabase,
   };
 
   // Project information.
@@ -168,7 +171,10 @@ const ProjectCreate = () => {
     tempTaskGrid: null,
     arbitraryTasks: false,
     organisation: '',
+    database: 'OSM'
   });
+
+  const [selectedOrgObj, updateSelectedOrgObj] = useState({});
 
   useLayoutEffect(() => {
     let err = { error: false, message: null };
@@ -191,6 +197,20 @@ const ProjectCreate = () => {
 
   const handleCreate = useCallback(
     (cloneProjectData) => {
+      if (!cloneProjectData.name) {
+        if (!metadata.projectName.trim()) {
+          setErr({ error: true, message: intl.formatMessage(messages.noProjectName) });
+          throw new Error('Missing project name.');
+        }
+        if (!/^[a-zA-Z]/.test(metadata.projectName)) {
+          setErr({ error: true, message: intl.formatMessage(messages.projectNameValidationError) });
+          throw new Error('Project name validation error.');
+        }
+      }
+      if (metadata.database === 'PDMAP') {
+        setErr({ error: true, message: intl.formatMessage(messages.noBox) });
+        throw new Error('Missing database.');
+      }
       if (!metadata.geom) {
         setErr({ error: true, message: intl.formatMessage(messages.noGeometry) });
         throw new Error('Missing geom.');
@@ -205,6 +225,7 @@ const ProjectCreate = () => {
         areaOfInterest: truncate(metadata.geom, { precision: 6 }),
         projectName: metadata.projectName,
         organisation: metadata.organisation || cloneProjectData.organisation,
+        database: metadata.database === 'OSM' ? '' : metadata.database,
         tasks: truncate(metadata.taskGrid, { precision: 6 }),
         arbitraryTasks: metadata.arbitraryTasks,
       };
@@ -265,6 +286,8 @@ const ProjectCreate = () => {
           <Review
             metadata={metadata}
             updateMetadata={updateMetadata}
+            selectedOrgObj={selectedOrgObj}
+            updateSelectedOrgObj={updateSelectedOrgObj}
             token={token}
             cloneProjectData={cloneProjectData}
           />
@@ -318,7 +341,7 @@ const ProjectCreate = () => {
                 handleCreate={() => handleCreate(cloneProjectData)}
               />
             </div>
-            <div className="cf absolute" style={{ bottom: '3.5rem', left: '0.6rem' }}>
+            <div className="cf absolute" style={{ bottom: '3.5rem', right: '0.6rem' }}>
               <p
                 className={`fl mr2 pa1 f7-ns white ${
                   metadata.area > MAX_AOI_AREA || metadata.area === 0 ? 'bg-red' : 'bg-green'

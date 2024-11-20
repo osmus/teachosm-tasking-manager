@@ -220,10 +220,11 @@ https://codepen.io/nielsenramon/pen/mLMeLY
     font-size: 1rem;
   }
 
-  a {
-    color: $red;
-    text-decoration: none;
-  }
+}
+
+a {
+  color: $red;
+  text-decoration: none;
 }
 
 .bottom-3 {
@@ -309,7 +310,7 @@ a[href="https://www.mapbox.com/map-feedback/"]
   object-fit: contain;
 }
 
-#shareProject {
+#shareProjectTooltip {
   background-color: $white;
   color: $blue-dark;
   border-color: $blue-dark;
@@ -448,7 +449,15 @@ a[href="https://www.mapbox.com/map-feedback/"]
 .two-column {
   grid-template-columns: 6fr 4fr;
 }
-
+.graphics-container {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.input-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 600px));
+}
 .cards-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

@@ -1,5 +1,7 @@
 import { defineMessages } from 'react-intl';
 
+//import projectCreateMessages from '../projectCreate/messages';
+
 /**
  * Internationalized messages for use on project edit.
  */
@@ -345,6 +347,14 @@ export default defineMessages({
     id: 'projects.actions.task_reset.confirmation',
     defaultMessage: 'Are you sure you want to reset all tasks? You cannot undo this.',
   },
+  database: {
+    id: 'projects.formInputs.database',
+    defaultMessage: 'Database',
+  },
+  databaseInfo: {
+    id: 'projects.formInputs.database_info',
+    defaultMessage: 'The database cannot be changed after creating a project.',
+  },
   status: {
     id: 'projects.formInputs.status',
     defaultMessage: 'Status',
@@ -439,6 +449,10 @@ export default defineMessages({
     id: 'projects.formInputs.name',
     defaultMessage: 'Name of the project',
   },
+  projectNameValidationError: {
+    id: 'management.projects.edit.errors.project_name_validation_error',
+    defaultMessage: 'Project name should start with an alphabet.',
+ },
   dueDate: {
     id: 'projects.formInputs.dueDate',
     defaultMessage: 'Due date',

@@ -1,0 +1,3 @@
+[submodule "frontend/pd-editor"]
+	path = frontend/pd-editor
+	url = https://github.com/osm-sandbox/public-domain-id.git

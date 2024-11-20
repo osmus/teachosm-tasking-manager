@@ -1,4 +1,4 @@
-import React, { Fragment, useRef } from 'react';
+import { Fragment, useRef, forwardRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Popup from 'reactjs-popup';
@@ -33,7 +33,7 @@ export const Header = () => {
 
   const userDetails = useSelector((state) => state.auth.userDetails);
   const organisations = useSelector((state) => state.auth.organisations);
-  const showOrgBar = useSelector((state) => state.orgBarVisibility.isVisible);
+  const showOrgBar = false;//useSelector((state) => state.orgBarVisibility.isVisible);
 
   const linkCombo = 'link mh3 barlow-condensed blue-dark f4 ttu lh-solid nowrap pv2';
 
@@ -89,7 +89,7 @@ export const Header = () => {
     ) : null;
 
   return (
-    <header className="w-100 bb b--grey-light">
+    <header id="top-header" className="w-100 bb b--grey-light">
       <UpdateDialog />
       {checkUserEmail()}
       {showOrgBar && (
@@ -111,19 +111,21 @@ export const Header = () => {
           </div>
         </div>
       )}
-      <div className="mv3 ph2 dib w-100 flex justify-between items-center">
+      <div className="pv2 ph2 dib w-100 flex justify-between items-center">
         <Link to={'/'} className="link mv-1 flex flex-nowrap items-center">
           <img
             src={ORG_LOGO || logo}
             alt={`${ORG_NAME} logo`}
-            className="h2 ml2 v-mid"
+            className="h2 ml2 v-mid main-logo"
             onError={({ currentTarget }) => {
               // fallback to HOT logo if ORG_LOGO is broken
               currentTarget.onerror = null;
               currentTarget.src = logo;
             }}
           />
-          <span className="barlow-condensed f3 fw6 ml2 blue-dark nowrap">Tasking Manager</span>
+          <div className="wordmark barlow-condensed f4 ml2 blue-dark nowrap">
+            <span className="fw6">Tasking Manager</span>
+          </div>
         </Link>
         <HorizontalScroll
           className={'dn dib-l ml5-l mr4-l pl6-xl'}
@@ -208,6 +210,19 @@ const UserDisplay = ({ username }) => {
   );
 };
 
+const SignupTrigger = forwardRef((props, ref) => {
+  const { signUpStyle, alternativeSignUpText, ...remainingProps } = props;
+  return (
+    <Button className={signUpStyle} {...remainingProps}>
+      {alternativeSignUpText ? (
+        <FormattedMessage {...messages.createAccount} />
+      ) : (
+        <FormattedMessage {...messages.signUp} />
+      )}
+    </Button>
+  );
+});
+
 export const AuthButtons = ({
   logInStyle,
   signUpStyle,
@@ -227,13 +242,7 @@ export const AuthButtons = ({
       </Button>
       <Popup
         trigger={
-          <Button className={signUpStyle}>
-            {alternativeSignUpText ? (
-              <FormattedMessage {...messages.createAccount} />
-            ) : (
-              <FormattedMessage {...messages.signUp} />
-            )}
-          </Button>
+          <SignupTrigger signUpStyle={signUpStyle} alternativeSignUpText={alternativeSignUpText} />
         }
         modal
         closeOnDocumentClick
@@ -286,7 +295,7 @@ export const PopupItems = (props) => {
                 href={item.link}
                 target="_blank"
                 rel="noreferrer"
-                className="link mh3 barlow-condensed blue-dark f4 ttu"
+                className="link mh3 blue-dark f5 ttu"
               >
                 <FormattedMessage {...item.label} />
                 <ExternalLinkIcon className="pl2 v-cen" style={{ height: '15px' }} />

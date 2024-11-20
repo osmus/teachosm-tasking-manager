@@ -64,6 +64,10 @@ export default defineMessages({
     id: 'project.detail.typesOfMapping',
     defaultMessage: 'Types of Mapping',
   },
+  database: {
+    id: 'project.detail.database',
+    defaultMessage: 'Database',
+  },
   private: {
     id: 'project.detail.private',
     defaultMessage: 'Private',
@@ -239,6 +243,14 @@ export default defineMessages({
   viewInOsmcha: {
     id: 'project.detail.sections.contributions.osmcha',
     defaultMessage: 'Changesets in OSMCha',
+  },
+  live: {
+    id: 'project.detail.sections.contributions.live',
+    defaultMessage: 'Live',
+  },
+  liveMonitoring: {
+    id: 'project.detail.sections.contributions.liveMonitoring',
+    defaultMessage: 'Live monitoring',
   },
   changesets: {
     id: 'project.detail.sections.contributions.changesets',

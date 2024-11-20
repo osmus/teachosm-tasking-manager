@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
@@ -12,7 +11,7 @@ import { Footer } from '../components/footer';
 export function Root() {
   return (
     <div className="flex flex-column">
-      <TopBanner />
+      {/* <TopBanner /> */}
       <Header />
       <QueryParamProvider adapter={ReactRouter6Adapter}>
         <Outlet />

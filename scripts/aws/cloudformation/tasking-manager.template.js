@@ -195,6 +195,10 @@ const Parameters = {
   TaskingManagerLogo: {
     Description: "URL for logo",
     Type: "String"
+  },
+  OhsomeStatsToken: {
+    Description: "Ohsome Stats Token (must be same as frontend)",
+    Type: "String"
   }
 };
 
@@ -373,7 +377,7 @@ const Resources = {
       LaunchTemplateData: {
         IamInstanceProfile: {
           Name: cf.ref('TaskingManagerEC2InstanceProfile'),
-        }, 
+        },
         ImageId: cf.ref('TaskingManagerBackendAMI'),
         InstanceType: cf.ref('TaskingManagerBackendInstanceType'),
         KeyName: 'mbtiles',
@@ -390,10 +394,10 @@ const Resources = {
         // }],
         PrivateDnsNameOptions: {
           EnableResourceNameDnsAAAARecord: true,
-          EnableResourceNameDnsARecord: true, 
+          EnableResourceNameDnsARecord: true,
           HostnameType: 'resource-name'
         },
-        SecurityGroupIds: [cf.importValue(cf.join('-', ['hotosm-network-production', cf.ref('NetworkEnvironment'), 'ec2s-security-group', cf.region]))], 
+        SecurityGroupIds: [cf.importValue(cf.join('-', ['hotosm-network-production', cf.ref('NetworkEnvironment'), 'ec2s-security-group', cf.region]))],
         TagSpecifications: [
           {
             ResourceType: 'instance',
@@ -403,15 +407,15 @@ const Resources = {
                 Value: cf.stackName
               },
               {
-                Key: 'Project',
-                Value: 'Tasking Manager'
+                Key: 'project',
+                Value: 'tasking-manager'
               },
               {
-                Key: 'Tool',
-                Value: 'Tasking Manager'
+                Key: 'tool',
+                Value: 'tasking-manager'
               },
               {
-                Key: 'Maintainers',
+                Key: 'maintainers',
                 Value: 'dakota.benjamin and yogeshgirikumar'
               },
               {
@@ -427,6 +431,7 @@ const Resources = {
           'export DEBIAN_FRONTEND=noninteractive',
           'export LC_ALL="en_US.UTF-8"',
           'export LC_CTYPE="en_US.UTF-8"',
+          'export PATH=$PATH:/root/.local/bin',
           'dpkg-reconfigure --frontend=noninteractive locales',
           'sudo apt-get -q -y update',
           'sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade',
@@ -441,10 +446,10 @@ const Resources = {
           'cd /opt/tasking-manager/',
           cf.sub('git reset --hard ${GitSha}'),
           'pip install --upgrade pip pdm==2.7.4',
+          'pdm export --prod > requirements.txt',
           'wget -6 https://s3.dualstack.us-east-1.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz -O /tmp/aws-cfn-bootstrap-py3-latest.tar.gz',
           'pip install /tmp/aws-cfn-bootstrap-py3-latest.tar.gz',
-          'pdm install',
-          'eval "$(pdm venv activate)"',
+          'pip install --user -r requirements.txt',
           'echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf',
           'export LC_ALL=C',
           'wget -6 https://s3.dualstack.us-east-1.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -O /tmp/amazon-cloudwatch-agent.deb',
@@ -478,10 +483,11 @@ const Resources = {
           cf.sub('export TM_IMAGE_UPLOAD_API_KEY="${TaskingManagerImageUploadAPIKey}"'),
           'psql "host=$POSTGRES_ENDPOINT dbname=$POSTGRES_DB user=$POSTGRES_USER password=$POSTGRES_PASSWORD" -c "CREATE EXTENSION IF NOT EXISTS postgis"',
           cf.if('DatabaseDumpFileGiven', cf.sub('aws s3 cp ${DatabaseDump} dump.sql; sudo -u postgres psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_ENDPOINT/$POSTGRES_DB" < dump.sql'), ''),
-          'pdm run -vv flask db upgrade',
+          'flask db upgrade',
           'echo "------------------------------------------------------------"',
           cf.sub('export NEW_RELIC_LICENSE_KEY="${NewRelicLicense}"'),
           cf.sub('export TM_SENTRY_BACKEND_DSN="${SentryBackendDSN}"'),
+          cf.sub('export OHSOME_STATS_TOKEN="${OhsomeStatsToken}"'),
           'export NEW_RELIC_ENVIRONMENT=$TM_ENVIRONMENT',
           cf.sub('NEW_RELIC_CONFIG_FILE=./scripts/aws/cloudformation/newrelic.ini newrelic-admin run-program gunicorn -b 0.0.0.0:8000 --worker-class gevent --workers 5 --timeout 179 --access-logfile ${TaskingManagerLogDirectory}/gunicorn-access.log --access-logformat \'%(h)s %(l)s %(u)s %(t)s \"%(r)s\" %(s)s %(b)s %(T)s \"%(f)s\" \"%(a)s\"\' manage:application &'),
           cf.sub('sudo /usr/local/bin/cfn-init -v --stack ${AWS::StackName} --resource TaskingManagerLaunchTemplate --region ${AWS::Region} --configsets default'),
@@ -498,15 +504,15 @@ const Resources = {
               Value: cf.stackName
             },
             {
-              Key: 'Project',
-              Value: 'Tasking Manager'
+              Key: 'project',
+              Value: 'tasking-manager'
             },
             {
-              Key: 'Tool',
-              Value: 'Tasking Manager'
+              Key: 'tool',
+              Value: 'tasking-manager'
             },
             {
-              Key: 'Maintainers',
+              Key: 'maintainers',
               Value: 'dakota.benjamin and yogeshgirikumar'
             },
             {
@@ -657,7 +663,26 @@ const Resources = {
       SecurityGroups: [cf.importValue(cf.join('-', ['hotosm-network-production', cf.ref('NetworkEnvironment'), 'elbs-security-group', cf.region]))],
       Subnets: cf.ref('ELBSubnets'),
       Type: 'application',
-      Tags: [ { "Key": "stack_name", "Value": cf.stackName } ]
+      Tags: [  {
+          "Key": "stack_name",
+          "Value": cf.stackName
+        },
+        {
+          Key: 'project',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'tool',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'maintainers',
+          Value: 'dakota.benjamin and yogeshgirikumar'
+        },
+        {
+          Key: 'environment',
+          Value: cf.ref('NetworkEnvironment')
+        } ]
     }
   },
   BackendAPIDNSEntries: {
@@ -710,7 +735,28 @@ const Resources = {
       Port: 8000,
       Protocol: 'HTTP',
       VpcId: cf.importValue(cf.join('-', ['hotosm-network-production', 'default-vpc', cf.region])),
-      Tags: [ { "Key": "stack_name", "Value": cf.stackName } ],
+      Tags: [
+        {
+          "Key": "stack_name",
+          "Value": cf.stackName
+        },
+        {
+          Key: 'project',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'tool',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'maintainers',
+          Value: 'dakota.benjamin and yogeshgirikumar'
+        },
+        {
+          Key: 'environment',
+          Value: cf.ref('NetworkEnvironment')
+        }
+      ],
       Matcher: {
         HttpCode: '200,202,302,304'
       }
@@ -758,7 +804,7 @@ const Resources = {
     },
     Properties: {
         Engine: 'postgres',
-	AllowMajorVersionUpgrade: true,
+	      AllowMajorVersionUpgrade: true,
         DBName: cf.if('UseASnapshot', cf.noValue, cf.ref('PostgresDB')),
         EngineVersion: cf.ref('DatabaseEngineVersion'),
         MasterUsername: cf.if('UseASnapshot', cf.noValue, cf.ref('PostgresUser')),
@@ -771,7 +817,25 @@ const Resources = {
         DBInstanceClass: cf.ref('DatabaseInstanceType'),
         DBSnapshotIdentifier: cf.if('UseASnapshot', cf.ref('DBSnapshot'), cf.noValue),
         VPCSecurityGroups: [cf.importValue(cf.join('-', ['hotosm-network-production', cf.ref('NetworkEnvironment'), 'ec2s-security-group', cf.region]))],
-	PubliclyAccessible: false
+	      PubliclyAccessible: false,
+        Tags: [
+        {
+          Key: 'project',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'tool',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'maintainers',
+          Value: 'dakota.benjamin and yogeshgirikumar'
+        },
+        {
+          Key: 'environment',
+          Value: cf.ref('NetworkEnvironment')
+        }
+      ]
     }
   },
   TaskingManagerReactBucket: {
@@ -782,7 +846,25 @@ const Resources = {
         ErrorDocument: 'index.html',
         IndexDocument: 'index.html'
       },
-      AccessControl: "Private"
+      AccessControl: "Private",
+      Tags: [
+        {
+          Key: 'project',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'tool',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'maintainers',
+          Value: 'dakota.benjamin and yogeshgirikumar'
+        },
+        {
+          Key: 'environment',
+          Value: cf.ref('NetworkEnvironment')
+        }
+      ]
     }
   },
   TaskingManagerReactBucketPolicy: {
@@ -911,7 +993,25 @@ const Resources = {
           MinimumProtocolVersion: 'TLSv1.2_2021',
           SslSupportMethod: 'sni-only'
         }
-      }
+      },
+      Tags: [
+        {
+          Key: 'project',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'tool',
+          Value: 'tasking-manager'
+        },
+        {
+          Key: 'maintainers',
+          Value: 'dakota.benjamin and yogeshgirikumar'
+        },
+        {
+          Key: 'environment',
+          Value: cf.ref('NetworkEnvironment')
+        }
+      ]
     }
   },
 
