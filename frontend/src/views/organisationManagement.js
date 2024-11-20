@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ReactPlaceholder from 'react-placeholder';
@@ -267,6 +267,7 @@ export function EditOrganisation() {
                 description: organisation.description,
                 type: organisation.type,
                 subscriptionTier: organisation.subscriptionTier,
+                databases: organisation.databases,
               }}
               updateOrg={updateOrg}
               disabledForm={error || loading}

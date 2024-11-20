@@ -1,3 +1,4 @@
+import os
 import json
 import re
 from typing import Optional
@@ -61,6 +62,7 @@ from backend.models.postgis.utils import (
 )
 from backend.services.grid.grid_service import GridService
 from backend.models.postgis.interests import Interest, project_interests
+import os
 
 # Secondary table defining many-to-many join for projects that were favorited by users.
 project_favorites = db.Table(
@@ -118,6 +120,7 @@ class Project(db.Model):
 
     # Columns
     id = db.Column(db.Integer, primary_key=True)
+    database = db.Column(db.String, nullable=False)
     status = db.Column(db.Integer, default=ProjectStatus.DRAFT.value, nullable=False)
     created = db.Column(db.DateTime, default=timestamp, nullable=False)
     priority = db.Column(db.Integer, default=ProjectPriority.MEDIUM.value)
@@ -234,6 +237,10 @@ class Project(db.Model):
             ProjectInfo.create_from_name(draft_project_dto.project_name)
         )
         self.organisation = draft_project_dto.organisation
+
+        if draft_project_dto.database is not None:
+            self.database = draft_project_dto.database
+
         self.status = ProjectStatus.DRAFT.value
         self.author_id = draft_project_dto.user_id
         self.last_updated = timestamp()
@@ -271,7 +278,8 @@ class Project(db.Model):
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/58.0.3029.110 Safari/537.3"
-            )
+            ),
+            "Referer": os.environ.get("TM_APP_BASE_URL", "https://example.com"),
         }
         try:
             response = requests.get(url, headers=headers)
@@ -386,6 +394,7 @@ class Project(db.Model):
 
     def update(self, project_dto: ProjectDTO):
         """Updates project from DTO"""
+        self.database = project_dto.database
         self.status = ProjectStatus[project_dto.project_status].value
         self.priority = ProjectPriority[project_dto.project_priority].value
         locales = [i.locale for i in project_dto.project_info_locales]
@@ -861,6 +870,7 @@ class Project(db.Model):
         summary.random_task_selection_enforced = self.enforce_random_task_selection
         summary.private = self.private
         summary.license_id = self.license_id
+        summary.database = self.database
         summary.status = ProjectStatus(self.status).name
         summary.id_presets = self.id_presets
         summary.extra_id_params = self.extra_id_params
@@ -994,6 +1004,7 @@ class Project(db.Model):
         """Populates a project DTO with properties common to all roles"""
         base_dto = ProjectDTO()
         base_dto.project_id = self.id
+        base_dto.database= self.database
         base_dto.project_status = ProjectStatus(self.status).name
         base_dto.default_locale = self.default_locale
         base_dto.project_priority = ProjectPriority(self.priority).name

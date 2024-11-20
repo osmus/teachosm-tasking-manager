@@ -1,4 +1,4 @@
-FROM node:16 as build
+FROM node:18.19.1 as build
 
 # Copy environment variables from Digital Ocean
 ARG ENABLE_PROXYFIX

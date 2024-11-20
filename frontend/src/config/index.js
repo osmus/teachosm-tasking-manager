@@ -1,12 +1,11 @@
 // API ENDPOINTS
+export const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://127.0.0.1:3000';
 export const API_VERSION = process.env.REACT_APP_API_VERSION || 'v2';
 export const API_URL = process.env.REACT_APP_API_URL
   ? new URL('api/' + API_VERSION + '/', process.env.REACT_APP_API_URL)
   : 'http://127.0.0.1:8000/api/' + API_VERSION + '/';
 export const OHSOME_STATS_BASE_URL =
   process.env.REACT_APP_OHSOME_STATS_BASE_URL || 'https://stats.now.ohsome.org/api';
-export const OHSOME_STATS_TOKEN = process.env.REACT_APP_OHSOME_STATS_TOKEN || '';
-
 // APPLICATION SETTINGS
 export const DEFAULT_LOCALE = process.env.REACT_APP_DEFAULT_LOCALE || 'en';
 export const ENVIRONMENT = process.env.REACT_APP_ENVIRONMENT || '';
@@ -49,9 +48,16 @@ export const HOMEPAGE_VIDEO_URL = process.env.REACT_APP_HOMEPAGE_VIDEO_URL || ''
 // Sentry.io DSN
 export const SENTRY_FRONTEND_DSN = process.env.REACT_APP_SENTRY_FRONTEND_DSN;
 
+// Public Domain Map
+export const PD_CLIENT_ID = process.env.REACT_APP_PD_CLIENT_ID || '';
+export const PD_CLIENT_SECRET = process.env.REACT_APP_PD_CLIENT_SECRET || '';
+export const PD_SERVER_URL = process.env.REACT_APP_PD_SERVER_URL || '';
+
 // OSM API and Editor URLs
 export const OSM_SERVER_URL =
   process.env.REACT_APP_OSM_SERVER_URL || 'https://www.openstreetmap.org';
+export const OSM_SERVER_API_URL =
+  process.env.REACT_APP_OSM_SERVER_API_URL || 'https://api.openstreetmap.org';
 export const ID_EDITOR_URL =
   process.env.REACT_APP_ID_EDITOR_URL || 'https://www.openstreetmap.org/edit?editor=id&';
 export const POTLATCH2_EDITOR_URL =
@@ -59,6 +65,8 @@ export const POTLATCH2_EDITOR_URL =
   'https://www.openstreetmap.org/edit?editor=potlatch2';
 export const RAPID_EDITOR_URL =
   process.env.REACT_APP_RAPID_EDITOR_URL || 'https://mapwith.ai/rapid';
+export const PDEDITOR_URL =
+  process.env.REACT_APP_PDEDITOR_URL || 'https://publicdomainmap.org';
 export const EXPORT_TOOL_S3_URL = process.env.REACT_APP_EXPORT_TOOL_S3_URL || '';
 export const ENABLE_EXPORT_TOOL = process.env.REACT_APP_ENABLE_EXPORT_TOOL || '';
 
@@ -173,6 +181,8 @@ export const MAP_STYLE = MAPBOX_TOKEN
 export const MAPBOX_RTL_PLUGIN_URL =
   'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.0/mapbox-gl-rtl-text.js';
 
+export const UNDERPASS_URL = process.env.REACT_APP_UNDERPASS_URL || 'https://underpass.hotosm.org';
+
 export const DROPZONE_SETTINGS = {
   accept: {
     'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif'],
@@ -183,3 +193,6 @@ export const DROPZONE_SETTINGS = {
   // At time of writing, this workaround is only needed on Chromium based browsers.
   noClick: true,
 };
+
+// TM_DEFAULT_CHANGESET_COMMENT without '#'
+export const defaultChangesetComment = TM_DEFAULT_CHANGESET_COMMENT.replace('#', '');

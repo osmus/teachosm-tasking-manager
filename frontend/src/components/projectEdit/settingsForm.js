@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import messages from './messages';
@@ -21,7 +21,7 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
     setProjectInfo({ ...projectInfo, defaultLocale: event.target.value });
   };
 
-  const editors = getEditors();
+  const editors = getEditors(projectInfo.database);
   return (
     <div className="w-100">
       <div className={styleClasses.divClass}>
@@ -41,6 +41,7 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
           ))}
         </select>
       </div>
+      <>
       <div className={styleClasses.divClass}>
         <label className={styleClasses.labelClass}>
           <FormattedMessage {...messages.mappingEditors} />
@@ -109,6 +110,7 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
           </div>
         )}
       </div>
+      </>
       <div className={styleClasses.divClass}>
         <label className={styleClasses.labelClass}>
           <FormattedMessage {...messages.randomTaskSelection} />

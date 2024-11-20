@@ -283,7 +283,7 @@ export default defineMessages({
   },
   contributions: {
     id: 'project.contributions',
-    defaultMessage: 'contributions',
+    defaultMessage: 'Contributions',
   },
   registered: {
     id: 'project.contributions.registered',

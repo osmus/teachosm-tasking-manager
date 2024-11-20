@@ -7,7 +7,7 @@ import {
   NumberParam,
   BooleanParam,
 } from 'use-query-params';
-import { stringify as stringifyUQP } from 'query-string';
+import queryString from 'query-string';
 import axios from 'axios';
 import { subMonths, format } from 'date-fns';
 
@@ -17,6 +17,7 @@ import { remapParamsToAPI } from '../utils/remapParamsToAPI';
 import { API_URL } from '../config';
 
 const projectQueryAllSpecification = {
+  database: StringParam,
   difficulty: StringParam,
   organisation: StringParam,
   campaign: StringParam,
@@ -50,6 +51,7 @@ export const useExploreProjectsQueryParams = () => {
    this fn takes an object with queryparam keys and outputs JSON keys
    while maintaining the same values */
 const backendToQueryConversion = {
+  database: 'database',
   difficulty: 'difficulty',
   campaign: 'campaign',
   team: 'teamId',
@@ -71,7 +73,7 @@ const backendToQueryConversion = {
   stale: 'lastUpdatedTo',
   createdFrom: 'createdFrom',
   basedOnMyInterests: 'basedOnMyInterests',
-  omitMapResults:'omitMapResults',
+  omitMapResults: 'omitMapResults',
 };
 
 const dataFetchReducer = (state, action) => {
@@ -228,5 +230,5 @@ export const useProjectsQueryAPI = (
 
 export const stringify = (obj) => {
   const encodedQuery = encodeQueryParams(projectQueryAllSpecification, obj);
-  return stringifyUQP(encodedQuery);
+  return queryString.stringify(encodedQuery);
 };

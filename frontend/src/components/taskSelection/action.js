@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactPlaceholder from 'react-placeholder';
@@ -36,8 +36,9 @@ import { SessionAboutToExpire, SessionExpired } from './extendSession';
 import { MappingTypes } from '../mappingTypes';
 import { usePriorityAreasQuery, useTaskDetail } from '../../api/projects';
 
-const Editor = React.lazy(() => import('../editor'));
-const RapiDEditor = React.lazy(() => import('../rapidEditor'));
+const Editor = lazy(() => import('../editor'));
+const RapiDEditor = lazy(() => import('../rapidEditor'));
+const PDEditor = lazy(() => import('../pdEditor'));
 
 const MINUTES_BEFORE_DIALOG = 5;
 
@@ -207,7 +208,7 @@ export function TaskMapAction({ project, tasks, activeTasks, getTasks, action, e
         <div className="cf w-100 vh-minus-69-ns overflow-y-hidden">
           <div className={`fl h-100 relative ${showSidebar ? 'w-70' : 'w-100-minus-4rem'}`}>
             {['ID', 'RAPID'].includes(editor) ? (
-              <React.Suspense
+              <Suspense
                 fallback={
                   <div className={`w7 h5 center`}>
                     <ReactPlaceholder
@@ -219,26 +220,38 @@ export function TaskMapAction({ project, tasks, activeTasks, getTasks, action, e
                   </div>
                 }
               >
-                {editor === 'ID' ? (
-                  <Editor
-                    setDisable={setDisable}
-                    comment={project.changesetComment}
-                    presets={project.idPresets}
-                    imagery={formatImageryUrlCallback(project.imagery)}
-                    gpxUrl={getTaskGpxUrlCallback(project.projectId, tasksIds)}
-                  />
+                {project.database === '' ? (
+                  editor === 'ID' ? (
+                    <Editor
+                      setDisable={setDisable}
+                      comment={project.changesetComment}
+                      presets={project.idPresets}
+                      imagery={formatImageryUrlCallback(project.imagery)}
+                      gpxUrl={getTaskGpxUrlCallback(project.projectId, tasksIds)}
+                    />
+                  ) : (
+                    <RapiDEditor
+                      setDisable={setDisable}
+                      comment={project.changesetComment}
+                      presets={project.idPresets}
+                      imagery={formatImageryUrlCallback(project.imagery)}
+                      gpxUrl={getTaskGpxUrlCallback(project.projectId, tasksIds)}
+                      powerUser={project.rapidPowerUser}
+                      showSidebar={showSidebar}
+                    />
+                  )
                 ) : (
-                  <RapiDEditor
+                  <PDEditor
                     setDisable={setDisable}
                     comment={project.changesetComment}
                     presets={project.idPresets}
                     imagery={formatImageryUrlCallback(project.imagery)}
+                    apiUrl={`https://api.${project.database}.boxes.osmsandbox.us`}
                     gpxUrl={getTaskGpxUrlCallback(project.projectId, tasksIds)}
-                    powerUser={project.rapidPowerUser}
-                    showSidebar={showSidebar}
                   />
-                )}
-              </React.Suspense>
+                )
+              }
+              </Suspense>
             ) : (
               <ReactPlaceholder
                 showLoadingAnimation={true}
@@ -260,7 +273,7 @@ export function TaskMapAction({ project, tasks, activeTasks, getTasks, action, e
             )}
           </div>
           {showSidebar ? (
-            <div className="w-30 fr pt3 ph3 h-100 overflow-y-scroll base-font bg-white">
+            <div className={`w-30 fr pt3 ph3 h-100 overflow-y-scroll base-font bg-white db-${project.database === '' ? 'OSM' : 'PDMAP'}`}>
               <ReactPlaceholder
                 showLoadingAnimation={true}
                 rows={3}

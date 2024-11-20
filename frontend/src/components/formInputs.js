@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Field } from 'react-final-form';
 import Select from 'react-select';
@@ -29,7 +29,7 @@ export const SwitchToggle = ({
   labelPosition,
   small = false,
 }: Object) => (
-  <div className="v-mid justify-center bg-grey-dark">
+  <div className="v-mid justify-center">
     {label && labelPosition !== 'right' && <span className="di mr2 nowrap f6 dn-m">{label}</span>}
     <div className="relative dib">
       <input
@@ -93,6 +93,42 @@ export function OrganisationSelectInput({ className }) {
   );
 }
 
+export const SandboxBoxSelect = ({ className, boxId, onChange }) => {
+  const [boxes, setBoxes] = useState([]);
+
+  useEffect(() => {
+    fetch(`https://dashboard.osmsandbox.us/v1/boxes`)
+      .then(response => response.json())
+      .then(result => {
+        /*result.push({
+          name: "✦ New Box ✦"
+        });*/
+        setBoxes(result);
+      })
+      .catch(error => {
+        console.error('Error initializing session:', error);
+      });
+  });
+
+  const getBoxPlaceholder = (id) => {
+    const orgs = boxes.filter((org) => org.organisationId === id);
+    return orgs.length ? orgs[0].name : <FormattedMessage {...messages.selectBox} />;
+  };
+
+  return (
+    <Select
+      classNamePrefix="react-select"
+      isClearable={false}
+      getOptionLabel={(option) => option.name}
+      getOptionValue={(option) => option.name}
+      options={boxes}
+      placeholder={getBoxPlaceholder(boxId)}
+      onChange={onChange}
+      className={className}
+    />
+  );
+};
+
 export function UserCountrySelect({ className, isDisabled = false }: Object) {
   const locale = useSelector((state) => state.preferences.locale);
   const [options, setOptions] = useState([]);
@@ -153,6 +189,7 @@ export const CheckBoxInput = ({ isActive, changeState, className = '', disabled 
 );
 
 export const CheckBox = ({ activeItems, toggleFn, itemId }) => {
+  if (!activeItems) activeItems = [];
   const isActive = activeItems.includes(itemId);
   const changeState = (e) => {
     e.persist();

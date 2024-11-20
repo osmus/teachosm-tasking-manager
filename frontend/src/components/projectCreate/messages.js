@@ -52,6 +52,18 @@ export default defineMessages({
     id: 'management.projects.create.review_tasks.organization',
     defaultMessage: 'Organization',
   },
+  database: {
+    id: 'management.projects.create.review_tasks',
+    defaultMessage: 'Database',
+  },
+  limitedOrgDatabasesOSM: {
+    id: 'management.projects.create.limited_org_databasesOSM',
+    defaultMessage: 'This organization is limited to OpenStreetMap. Contact info@publicdomainmap.org for greater access.',
+  },
+  limitedOrgDatabasesPDMAP: {
+    id: 'management.projects.create.limited_org_databasesPDMAP',
+    defaultMessage: 'This organization is limited to Public Domain Map. Contact info@publicdomainmap.org for greater access.',
+  },
   creationFailed: {
     id: 'management.projects.create.review_tasks.failure.message',
     defaultMessage: 'It was not possible to save your project due to an error: {error}',
@@ -122,6 +134,18 @@ export default defineMessages({
   closedLinestring: {
     id: 'management.projects.create.errors.closed_linestring',
     defaultMessage: 'Points do not form a closed linestring',
+  },
+  noProjectName: {
+    id: 'management.projects.create.errors.no_project_name',
+    defaultMessage: 'Name is a required field.',
+  },
+  projectNameValidationError: {
+    id: 'management.projects.create.errors.project_name_validation_error',
+    defaultMessage: 'Project name should start with an alphabet.',
+  },
+  noBox: {
+    id: 'management.projects.create.errors.nobox',
+    defaultMessage: "You need to select the project's box.",
   },
   noGeometry: {
     id: 'management.projects.create.errors.no_geometry',

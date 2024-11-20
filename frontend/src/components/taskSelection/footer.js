@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Popup from 'reactjs-popup';
@@ -143,14 +143,14 @@ const TaskSelectionFooter = ({
       project.mappingEditors &&
       (taskAction.startsWith('validate') || taskAction === 'resumeValidation')
     ) {
-      const validationEditorOptions = getEditors(project.validationEditors, project.customEditor);
+      const validationEditorOptions = getEditors(project.database, project.validationEditors, project.customEditor);
       setEditorOptions(validationEditorOptions);
       // activate defaultUserEditor if it's allowed. If not, use the first allowed editor for validation
       if (!project.validationEditors.includes(editor)) {
         updateEditor(validationEditorOptions);
       }
     } else {
-      const mappingEditorOptions = getEditors(project.mappingEditors, project.customEditor);
+      const mappingEditorOptions = getEditors(project.database, project.mappingEditors, project.customEditor);
       setEditorOptions(mappingEditorOptions);
       // activate defaultUserEditor if it's allowed. If not, use the first allowed editor
       if (!project.mappingEditors.includes(editor)) {

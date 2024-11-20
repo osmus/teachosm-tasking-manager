@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import { createContext, useState, useLayoutEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import ReactPlaceholder from 'react-placeholder';
@@ -24,7 +24,7 @@ import { useFetch } from '../hooks/UseFetch';
 import { useAsync } from '../hooks/UseAsync';
 import { useEditProjectAllowed } from '../hooks/UsePermissions';
 
-export const StateContext = React.createContext();
+export const StateContext = createContext();
 
 export const styleClasses = {
   divClass: 'w-70-l w-100 pb4 mb3',
@@ -121,7 +121,9 @@ export function ProjectEdit() {
       });
     } else {
       const mandatoryFieldsMissing = mandatoryFields.filter(
-        (m) => Object.keys(defaultLocaleInfo).includes(m) === false || defaultLocaleInfo[m] === '',
+        (m) =>
+          Object.keys(defaultLocaleInfo).includes(m) === false ||
+          defaultLocaleInfo[m].trim() === '',
       );
       if (mandatoryFieldsMissing.length) {
         missingFields.push({
@@ -130,7 +132,6 @@ export function ProjectEdit() {
         });
       }
     }
-
     const nonLocaleMissingFields = [];
     if (projectInfo.mappingTypes.length === 0) nonLocaleMissingFields.push('mappingTypes');
     const { mappingEditors, validationEditors, customEditor } = projectInfo;
@@ -160,7 +161,17 @@ export function ProjectEdit() {
     ) {
       missingFields.push({ type: 'noTeamsAssigned' });
     }
-
+    // validate name
+    if (!missingFields?.[0]?.fields?.includes('name')) {
+      const projectName = defaultLocaleInfo.name;
+      if (!/^[a-zA-Z]/.test(projectName)) {
+        missingFields.push({
+          locale: projectInfo.defaultLocale,
+          fields: ['projectNameValidationError'],
+          type: 'nameValidationError',
+        });
+      }
+    }
     if (missingFields.length > 0) {
       setError(missingFields);
       return new Promise((resolve, reject) => reject());
@@ -189,7 +200,7 @@ export function ProjectEdit() {
 
   const renderList = () => {
     const checkSelected = (optionSelected) => {
-      let liClass = 'w-90 link barlow-condensed f4 fw5 pv3 pl2 pointer';
+      let liClass = 'w-90 link f4 fw5 pv3 pl2 pointer';
       if (option === optionSelected) {
         liClass = liClass.concat(' fw6 bg-grey-light');
       }
@@ -210,7 +221,7 @@ export function ProjectEdit() {
 
     return (
       <div>
-        <ul className="list pl0 mt0 ttu">
+        <ul className="list pl0 mt0">
           {elements.map((elm, n) => (
             <li key={n} className={checkSelected(elm.value)} onClick={() => setOption(elm.value)}>
               <FormattedMessage {...messages[`projectEditSection_${elm.value}`]} />
@@ -261,7 +272,7 @@ export function ProjectEdit() {
   };
 
   return (
-    <div className="cf pv3 blue-dark">
+    <div className={`cf pv3 blue-dark db-${projectInfo.database === '' ? 'OSM' : 'PDMAP'}`}>
       <h2 className="pb2 f2 fw6 mt2 mb3 ttu barlow-condensed blue-dark">
         <FormattedMessage {...messages.editProject} />
       </h2>
@@ -347,6 +358,14 @@ const ErrorTitle = ({ locale, numberOfMissingFields, type, projectInfo }) => {
           mapping: doesMappingTeamNotExist(teams, mappingPermission),
           validation: doesValidationTeamNotExist(teams, validationPermission),
         }}
+      />
+    );
+  }
+  if (type === 'nameValidationError') {
+    return (
+      <FormattedMessage
+        id="management.projects.create.errors.project_name_validation_error"
+        defaultMessage="Project Name Validation Error"
       />
     );
   }
