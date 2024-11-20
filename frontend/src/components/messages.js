@@ -73,7 +73,7 @@ export default defineMessages({
   },
   databasePDMAP: {
     id: 'project.formInputs.database.options.pdmap',
-    defaultMessage: 'Public Domain Map',
+    defaultMessage: 'Sandbox',
   },
   difficultyALL: {
     id: 'mapping.difficulty.all',

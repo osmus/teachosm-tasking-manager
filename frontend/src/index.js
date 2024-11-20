@@ -35,7 +35,7 @@ if (SENTRY_FRONTEND_DSN) {
 
 load({
   google: {
-    families: ['Zilla Slab:400,500,600,700', 'Source Sans Pro:400,500,600,700', 'sans-serif'],
+    families: ['Barlow Condensed:400,500,600,700', 'Archivo:400,500,600,700', 'sans-serif'],
   },
 });
 
