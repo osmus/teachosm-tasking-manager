@@ -35,7 +35,7 @@ export const Header = () => {
   const organisations = useSelector((state) => state.auth.organisations);
   const showOrgBar = false;//useSelector((state) => state.orgBarVisibility.isVisible);
 
-  const linkCombo = 'link mh3 blue-dark f5 lh-solid nowrap pv2';
+  const linkCombo = 'link mh3 barlow-condensed blue-dark f4 ttu lh-solid nowrap pv2';
 
   const isActive = ({ isPartiallyCurrent }) => {
     return isPartiallyCurrent
@@ -124,8 +124,7 @@ export const Header = () => {
             }}
           />
           <div className="wordmark barlow-condensed f4 ml2 blue-dark nowrap">
-            <span className="fw6">OpenStreetMap US</span>
-            <span className="">Tasking Manager</span>
+            <span className="fw6">Tasking Manager</span>
           </div>
         </Link>
         <HorizontalScroll
